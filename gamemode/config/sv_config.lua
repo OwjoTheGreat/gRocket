@@ -16,3 +16,8 @@ GM.Config.DefaultCoins = 100
 GM.Config.PlayerLoadout = {
 	"weapon_physgun"
 }
+
+GM.Config.CarPos = Vector( -121.218681 , 652.886230 , -12223.968750 )
+GM.Config.CarAng = Angle( 3.798785 , -65.527260 , 0.000000 )
+
+GM.Config.BoardPos = Vector( -100.635704 , 8.880029 , -12223.968750 )

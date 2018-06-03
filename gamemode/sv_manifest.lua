@@ -9,6 +9,12 @@
 include( "config/sh_config.lua" )
 include( "config/sv_config.lua" )
 
+include( "match/sv_match.lua" )
+
+include( "map/sv_map.lua" )
+
+include( "car/sv_car.lua" )
+
 
 // ClientSide AddCSLua Files:
 
