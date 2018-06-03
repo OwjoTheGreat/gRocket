@@ -21,3 +21,5 @@ GM.Config.CarPos = Vector( -121.218681 , 652.886230 , -12223.968750 )
 GM.Config.CarAng = Angle( 3.798785 , -65.527260 , 0.000000 )
 
 GM.Config.BoardPos = Vector( -100.635704 , 8.880029 , -12223.968750 )
+
+GM.Config.BallPos = Vector( -617.560852 , 2343.134766 , -12335.968750 )

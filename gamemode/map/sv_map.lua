@@ -15,4 +15,9 @@ function GM.Map:InitPostEntity()
 	board:Spawn()
 	board:Activate()
 
+	local ball = ents.Create("ent_match_ball")
+	ball:SetPos( GAMEMODE.Config.BallPos )
+	ball:Spawn()
+	ball:Activate()	
+
 end
