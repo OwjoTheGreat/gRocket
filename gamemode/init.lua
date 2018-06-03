@@ -40,6 +40,12 @@ function GM:KeyPress( ply , key )
 
 end
 
+function GM:KeyRelease( ply , key )
+
+	self.Car:KeyRelease( ply , key )
+
+end
+
 function GM:CanExitVehicle( veh , ply )
 
 	if ply:IsInMatch() then

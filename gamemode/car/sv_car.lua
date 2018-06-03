@@ -1,10 +1,12 @@
 --[[
 
-	Server Side Matchmaking
+	Server Side Car Files
 
 ]]
 
 GM.Car = (GAMEMODE or GM).Car or {}
+
+GM.Car.Boosts = (GAMEMODE or GM).Car.Boosts or {}
 
 function GM.Car:Jump( ply )
 
@@ -24,6 +26,26 @@ function GM.Car:Jump( ply )
 
 end
 
+function GM.Car:Boost( ply )
+
+	if !ply:GetCar() then return end
+
+	local car = ply:GetCar()
+
+	local phys = car:GetPhysicsObject()
+
+	self.Boosts[ply:SteamID64()] = car
+
+	while( self.Boosts[ply:SteamID64()] and ply:GetCar() ) do
+
+		local forward = car:GetForward()
+
+		phys:AddVelocity( forward + Vector( 200 , 0 , 0 ) )
+
+	end
+
+end
+
 function GM.Car:KeyPress( ply , key )
 
 	if ( key == IN_ATTACK ) then
@@ -31,5 +53,21 @@ function GM.Car:KeyPress( ply , key )
 		self:Jump( ply )
 
 	end
+
+	if ( key == IN_ATTACK2 ) then
+		
+		self:Boost( ply )
+
+	end	
+
+end
+
+function GM.Car:KeyRelease( ply , key )
+
+	if ( key == IN_ATTACK2 ) then
+		
+		self.Boosts[ply:SteamID64()] = nil
+
+	end	
 
 end
