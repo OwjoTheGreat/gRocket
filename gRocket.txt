@@ -1,0 +1,12 @@
+"gRocket"
+{
+	"base"			"base"
+	"title"			"gRocket"
+	"maps"			""
+	"menusystem"	"1"
+	
+	"settings"
+	{
+	}	
+
+}

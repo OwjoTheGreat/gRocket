@@ -1,0 +1,7 @@
+--[[
+
+	Shared Config
+
+]]
+
+GM.Config = {}
