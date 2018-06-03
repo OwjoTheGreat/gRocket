@@ -14,6 +14,12 @@ function GM.Car:Jump( ply )
 
 	local phys = car:GetPhysicsObject()
 
+	local speed = car:GetSpeed()
+	local angle = speed / -0.90
+
+	print( angle )
+
+	phys:AddAngleVelocity( Vector( angle , 0 , 0 ) )
 	phys:AddVelocity( Vector( 0, 0, 750 ) )
 
 end
