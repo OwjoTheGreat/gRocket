@@ -5,8 +5,8 @@ include("shared.lua")
 
 function ENT.Initialize(self)
 
-	self:SetModel("models/props_phx/misc/soccerball.mdl")
-	self:SetModelScale( 10 , 0 )
+	self:SetModel("models/gym_ball.mdl")
+	self:SetModelScale( 3, 0 )
 	self:SetUseType(SIMPLE_USE)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -16,17 +16,26 @@ function ENT.Initialize(self)
 
 	if phys:IsValid() then
 		phys:Wake()
-		phys:SetMass( 10 )
 	end
 
 end
 
 function ENT:Use(activator)
 
-	if activator:IsPlayer() and activator:Alive() then
+	//self:SetGravity( -10 )
 
-		GAMEMODE.Match:JoinMatch( activator )
+end
 
-	end
+function ENT:PhysicsCollide( data, physobj )
+
+	local LastSpeed = math.max( data.OurOldVelocity:Length(), data.Speed )
+	local NewVelocity = physobj:GetVelocity()
+	NewVelocity:Normalize()
+
+	LastSpeed = math.max( NewVelocity:Length(), LastSpeed )
+
+	local TargetVelocity = NewVelocity * LastSpeed * 5
+
+	physobj:SetVelocity( TargetVelocity )
 
 end

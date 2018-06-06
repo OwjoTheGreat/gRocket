@@ -17,9 +17,11 @@ GM.Config.PlayerLoadout = {
 	"weapon_physgun"
 }
 
-GM.Config.CarPos = Vector( -121.218681 , 652.886230 , -12223.968750 )
-GM.Config.CarAng = Angle( 3.798785 , -65.527260 , 0.000000 )
+GM.Config.SpawnPos = Vector( 7841.591797 , 3350.276367 , 1607.031250 )
 
-GM.Config.BoardPos = Vector( -100.635704 , 8.880029 , -12223.968750 )
+GM.Config.CarPos = Vector( 6148.564941 , 2318.067139 , 1088.031250 )
+GM.Config.CarAng = Angle( 0 , 90 , 0 )
 
-GM.Config.BallPos = Vector( -617.560852 , 2343.134766 , -12335.968750 )
+GM.Config.BoardPos = Vector( 7927.968750 , 3176.031250 , 1592.031250 )
+
+GM.Config.BallPos = Vector( 6144.689453 , 3329.415039 , 1260.531250 )

@@ -36,13 +36,19 @@ function GM.Car:Boost( ply )
 
 	self.Boosts[ply:SteamID64()] = car
 
-	while( self.Boosts[ply:SteamID64()] and ply:GetCar() ) do
+	timer.Create( "GROCKET_BOOST"..ply:SteamID64() , 0.1 , 0 , function()
 
-		local forward = car:GetForward()
+		if self.Boosts[ply:SteamID64()] then
 
-		phys:AddVelocity( forward + Vector( 200 , 0 , 0 ) )
+			phys:AddVelocity( Vector( 200 , 0 , 0 ) )
 
-	end
+		else
+
+			timer.Remove( "GROCKET_BOOST"..ply:SteamID64() )
+
+		end
+
+	end)
 
 end
 

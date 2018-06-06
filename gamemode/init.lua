@@ -34,6 +34,13 @@ function GM:InitPostEntity()
 
 end
 
+function GM:ChooseSpawnPos( ply )
+
+	ply:SetPos( self.Config.SpawnPos )
+
+end
+hook.Add("PlayerSpawn","gRocket_ChooseSpawn",function( ply ) GAMEMODE:ChooseSpawnPos( ply ) end)
+
 function GM:KeyPress( ply , key )
 
 	self.Car:KeyPress( ply , key )
