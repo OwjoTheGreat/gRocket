@@ -8,9 +8,27 @@ GM.Car = (GAMEMODE or GM).Car or {}
 
 GM.Car.Boosts = (GAMEMODE or GM).Car.Boosts or {}
 
+GM.Car.Jumps = (GAMEMODE or GM).Car.Jumps or {}
+
 function GM.Car:Jump( ply )
 
 	if !ply:GetCar() then return end
+
+	local jumpAmount = 0
+
+	if self.Jumps[ply:SteamID64()] then
+		jumpAmount = self.Jumps[ply:SteamID64()][1]
+	end
+
+	if jumpAmount >= 1 then	
+		if self.Jumps[ply:SteamID64()][2] + 2 > CurTime() then
+			return
+		else
+			self.Jumps[ply:SteamID64()] = { 0 , CurTime() }
+		end
+	else
+		self.Jumps[ply:SteamID64()] = { jumpAmount +1 , CurTime() }
+	end
 
 	local car = ply:GetCar()
 
@@ -18,8 +36,6 @@ function GM.Car:Jump( ply )
 
 	local speed = car:GetSpeed()
 	local angle = speed / -0.90
-
-	print( angle )
 
 	phys:AddAngleVelocity( Vector( angle , 0 , 0 ) )
 	phys:AddVelocity( Vector( 0, 0, 750 ) )
@@ -40,7 +56,7 @@ function GM.Car:Boost( ply )
 
 		if self.Boosts[ply:SteamID64()] then
 
-			phys:AddVelocity( Vector( 200 , 0 , 0 ) )
+			phys:AddVelocity( car:GetForward() * 100 )
 
 		else
 
