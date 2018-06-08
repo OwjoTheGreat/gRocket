@@ -37,6 +37,7 @@ function GM.Match:JoinMatch( ply )
 		
 		ply:SetInMatch( true )
 		self:SpawnPlayerCar( ply )
+		GAMEMODE.Car:PlayerJoinedMatch( ply )
 
 	end
 

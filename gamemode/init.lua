@@ -14,7 +14,7 @@ include( "sv_manifest.lua" )
 
 function GM:Initialize()
 
-
+	self.Car:Initialize()
 
 end
 
@@ -67,6 +67,16 @@ end
 
 function GM:PlayerNoClip( ply )
 	return true
+end
+
+function GM:PlayerShouldTakeDamage( ply, attacker )
+
+	if ply:IsInMatch() then
+		return false
+	end
+
+	return true
+
 end
 
 function GM:PlayerLoadout( ply )

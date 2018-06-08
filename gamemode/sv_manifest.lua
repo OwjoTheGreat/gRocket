@@ -21,3 +21,5 @@ include( "car/sv_car.lua" )
 AddCSLuaFile( "cl_manifest.lua" )
 
 AddCSLuaFile( "config/sh_config.lua" )
+
+AddCSLuaFile( "car/cl_car.lua" )
