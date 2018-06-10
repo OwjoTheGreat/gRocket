@@ -8,7 +8,7 @@ function ENT.Initialize(self)
 	self:SetModel("models/dav0r/hoverball.mdl")
 	self:SetUseType(SIMPLE_USE)
 	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetMoveType(MOVETYPE_NONE)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 
 	self:SetColor( 255, 127, 0 )
@@ -17,13 +17,17 @@ function ENT.Initialize(self)
 
 	if phys:IsValid() then
 		phys:Wake()
+		phys:EnableMotion( false )
+		phys:EnableCollisions( false )
 	end
+
+	self:SetBallAvailable( true )
 
 end
 
-function ENT:StartTouch( ent )
+function ENT:BoostTouch( ent )
 
-	if ent:GetClass() == "prop_vehicle_jeep_old" then
+	if ent:GetClass() == "prop_vehicle_jeep" then
 		
 		if self:GetBallAvailable() then
 			
@@ -31,9 +35,25 @@ function ENT:StartTouch( ent )
 			if !IsValid( ply ) then return end
 
 			ply:AddBoost( GAMEMODE.Config.BigBoostAmount )
-			self:Remove()
+			self:SetBallAvailable( false )
+
+			timer.Simple(GAMEMODE.Config.BoostDelay,function()
+
+				self:SetBallAvailable( true )
+
+			end)
 
 		end
+
+	end
+
+end
+
+function ENT:Think()
+
+	for k, v in pairs( ents.FindInSphere( self:GetPos() , 10 ) ) do
+
+		self:BoostTouch( v )
 
 	end
 

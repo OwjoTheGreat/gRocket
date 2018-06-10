@@ -33,7 +33,7 @@ function GM.Car:Initialize()
 				
 				if (GAMEMODE.Car.BoostAmounts[v:SteamID64()] - 1) >= 0 then
 
-					GAMEMODE.Car.BoostAmounts[v:SteamID64()] = GAMEMODE.Car.BoostAmounts[v:SteamID64()] - 1
+					GAMEMODE.Car.BoostAmounts[v:SteamID64()] = GAMEMODE.Car.BoostAmounts[v:SteamID64()] - 5
 					UpdateBoost( v )
 
 				else
@@ -99,7 +99,7 @@ function GM.Car:Boost( ply )
 
 	self.Boosts[ply:SteamID64()] = car
 
-	timer.Create( "GROCKET_BOOST"..ply:SteamID64() , 0.1 , 0 , function()
+	timer.Create( "GROCKET_BOOST"..ply:SteamID64() , 0.2 , 0 , function()
 
 		if self.Boosts[ply:SteamID64()] then
 
@@ -145,15 +145,16 @@ local pmeta = FindMetaTable( "Player" )
 
 function pmeta:AddBoost( amount )
 
-	local boostAmount = 0
-
-	if (GAMEMODE.Car.BoostAmounts[self:SteamID64()] + amount) >= 100 then
+	if (GAMEMODE.Car.BoostAmounts[self:SteamID64()] + amount) > 100 then
 		
-		boostAmount = 100 - amount
+		GAMEMODE.Car.BoostAmounts[self:SteamID64()] = 100
+
+	else
+
+		GAMEMODE.Car.BoostAmounts[self:SteamID64()] = GAMEMODE.Car.BoostAmounts[self:SteamID64()] + amount
 
 	end
 
-	GAMEMODE.Car.BoostAmounts[self:SteamID64()] = GAMEMODE.Car.BoostAmounts[self:SteamID64()] + boostAmount
 	UpdateBoost( self )
 
 end

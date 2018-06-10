@@ -8,9 +8,23 @@ GM.Match = (GAMEMODE or GM).Match or {}
 
 GM.Match.Cars = (GAMEMODE or GM).Match.Cars or {}
 
+util.AddNetworkString( "gRocket_UpdateMatch" )
+
 function GM.Match:InitialSpawn( ply )
 
 	ply:SetInMatch( false )
+
+end
+
+function GM.Match:OnCarSpawned( ply , car )
+
+	--[[for k, v in pairs( ents.FindByClass( "ent_boost_ball" ) ) do
+
+		local yes = constraint.NoCollide( v, car, 0, 0 )
+
+		if !yes then print("MEME") end
+
+	end]]
 
 end
 
@@ -29,6 +43,8 @@ function GM.Match:SpawnPlayerCar( ply )
 
 	self.Cars[ply:SteamID64()] = car
 
+	self.OnCarSpawned( ply , car )
+
 end
 
 function GM.Match:JoinMatch( ply )
@@ -38,6 +54,10 @@ function GM.Match:JoinMatch( ply )
 		ply:SetInMatch( true )
 		self:SpawnPlayerCar( ply )
 		GAMEMODE.Car:PlayerJoinedMatch( ply )
+
+		net.Start("gRocket_UpdateMatch")
+			net.WriteBool( true )
+		net.Send( ply )
 
 	end
 

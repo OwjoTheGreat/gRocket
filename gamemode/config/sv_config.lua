@@ -26,6 +26,8 @@ GM.Config.BoostMultiplier = 100
 
 GM.Config.BigBoostAmount = 100
 
+GM.Config.BoostDelay = 10
+
 // Map Config
 
 GM.Config.SpawnPos = Vector( 7841.591797 , 3350.276367 , 1607.031250 )
