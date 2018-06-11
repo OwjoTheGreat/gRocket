@@ -82,7 +82,7 @@ function GM.Match:JoinQueue( ply , queueID )
 
 	local plyName = ply:Nick()
 
-	if (#self.Queue[queueID]["Players"]["Team1"] == 3) then
+	if (#self.Queue[queueID]["Players"]["Team1"] > #self.Queue[queueID]["Players"]["Team2"]) then
 		table.insert( self.Queue[queueID]["Players"]["Team2"] , ply )
 	else
 		table.insert( self.Queue[queueID]["Players"]["Team1"] , ply )
