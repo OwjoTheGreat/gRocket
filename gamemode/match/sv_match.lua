@@ -7,13 +7,16 @@
 GM.Match = (GAMEMODE or GM).Match or {}
 
 GM.Match.Queue = (GAMEMODE or GM).Match.Queue or {}
-GM.Match.Queue_Client = (GAMEMODE or GM).Match.Queue_Client or {}
 
 GM.Match.Cars = (GAMEMODE or GM).Match.Cars or {}
 
 util.AddNetworkString( "gRocket_UpdateMatch" )
 util.AddNetworkString( "gRocket_UpdatePlayerQueue" )
 util.AddNetworkString( "gRocket_UpdateQueue" )
+util.AddNetworkString( "gRocket_RequestQueue" )
+
+util.AddNetworkString( "gRocket_RequestRandom" )
+util.AddNetworkString( "gRocket_RequestLeave" )
 
 function GM.Match:InitialSpawn( ply )
 
@@ -55,38 +58,79 @@ function GM.Match:SpawnPlayerCar( ply )
 
 end
 
-function GM.Match:JoinQueue( ply )
+function GM.Match:CreateLobby( ply , security )
+
+	local lobbyTable = {
+
+		["Security"] = security,
+		["Players"] = {
+
+			["Team1"] = {},
+			["Team2"] = {},
+
+		}
+
+	}
+
+	local index = table.insert( self.Queue , lobbyTable )
+
+	self:JoinQueue( ply , index )
+
+end
+
+function GM.Match:JoinQueue( ply , queueID )
+
+	local plyName = ply:Nick()
+
+	if (#self.Queue[queueID]["Players"]["Team1"] == 3) then
+		table.insert( self.Queue[queueID]["Players"]["Team2"] , ply )
+	else
+		table.insert( self.Queue[queueID]["Players"]["Team1"] , ply )
+	end
+
+	ply:SetInQueue( true )
+	ply:SetQueueID( queueID )
+
+	self:UpdatePlayerQueue( ply , true )
+	self:UpdateQueue()
+
+end
+
+function GM.Match:JoinRandomQueue( ply )
 
 	if !ply:IsInMatch() and !ply:IsInQueue() then
 
-		ply:SetInQueue( true )
+		local foundQueue = false
 
-		// Temp
-		if !self.Queue[1] then
-			self.Queue[1] = {}
-			self.Queue[1]["Team1"] = {}
-			self.Queue[1]["Team2"] = {}
+		// Find Open Random Queue:
+		for k, v in pairs(self.Queue) do
+			if v["Security"] == "open" then
+
+				// If team is full
+				if (#v["Players"]["Team1"] == 3) and (#v["Players"]["Team2"] == 3) then return end
+
+				// If everything is good, set the queue id
+				foundQueue = k
+				break // quit loop
+			end
 		end
 
-		self.Queue[1]["Team1"][ply:SteamID64()] = true
-
-		if !self.Queue_Client[1] then
-
-			self.Queue_Client[1] = {}
-			self.Queue_Client[1]["Team1"] = {}
-			self.Queue_Client[1]["Team2"] = {}
-
-		end
-
-		table.insert( self.Queue_Client[1]["Team1"] , ply:Name() )
-
-		self:UpdatePlayerQueue( ply , true )
-
-		self:UpdateQueue()
+		// Check if queue is set
+		if foundQueue then
+			self:JoinQueue( ply , foundQueue )
+		else // If not then create a new open lobby
+			self:CreateLobby( ply , "open" )
+		end		
 
 	end
 
 end
+
+net.Receive("gRocket_RequestRandom",function(len,ply)
+
+	GAMEMODE.Match:JoinRandomQueue( ply )
+
+end)
 
 function GM.Match:JoinMatch( ply )
 
@@ -122,8 +166,26 @@ end
 function GM.Match:UpdateQueue()
 
 	net.Start("gRocket_UpdateQueue")
-		net.WriteTable( self.Queue_Client )
+		net.WriteTable( self.Queue )
 	net.Broadcast()
+
+end
+
+function GM.Match:RequestQueue( ply )
+
+	local plyTable = {}
+
+	for k, v in pairs( player.GetAll() ) do
+
+		if !v:IsInQueue() or !v:IsInMatch() then
+			table.insert( plyTable, v )
+		end
+
+	end
+
+	net.Start( "gRocket_RequestQueue" )
+		net.WriteTable( plyTable )
+	net.Send( ply )
 
 end
 
@@ -139,9 +201,49 @@ function GM.Match:PlayerLeaveMatch( ply )
 
 end
 
+function GM.Match:PlayerLeaveQueue( ply )
+
+	if !ply:IsInQueue() then return end
+	if !ply:GetQueueID() then return end
+
+	local queueID = ply:GetQueueID()
+
+	table.RemoveByValue( self.Queue[queueID]["Players"]["Team1"] , ply )
+	table.RemoveByValue( self.Queue[queueID]["Players"]["Team2"] , ply )
+
+	if (#self.Queue[queueID]["Players"]["Team1"] == 0) and (#self.Queue[queueID]["Players"]["Team2"] == 0) then
+		self.Queue[queueID] = nil
+	end
+
+	ply:SetInQueue( false )
+	ply:SetQueueID( nil )
+
+	self:UpdatePlayerQueue( ply , false )
+	self:UpdateQueue()	
+
+end
+
+net.Receive("gRocket_RequestLeave",function(len,ply)
+
+	GAMEMODE.Match:PlayerLeaveQueue(ply)
+
+end)
+
+concommand.Add("join_match",function( ply, cmd, args )
+
+	GAMEMODE.Match:JoinMatch( ply )
+
+end)
+
 concommand.Add("leave_match",function( ply, cmd, args )
 
 	GAMEMODE.Match:PlayerLeaveMatch( ply )
+
+end)
+
+concommand.Add("get_queue",function( ply, cmd, args )
+
+	PrintTable( GAMEMODE.Match.Queue )
 
 end)
 
@@ -156,6 +258,18 @@ end
 function pmeta:SetInQueue( inQueue )
 
 	self.inQueue = inQueue
+
+end
+
+function pmeta:SetQueueID( queueID )
+
+	self.queueID = queueID
+
+end
+
+function pmeta:GetQueueID()
+
+	return self.queueID or false
 
 end
 

@@ -26,6 +26,7 @@ end
 
 function GM:PlayerDisconnected( ply )
 
+	self.Match:PlayerLeaveQueue( ply )
 	self.Match:PlayerLeaveMatch( ply )
 
 end
@@ -87,11 +88,7 @@ end
 
 function GM:PlayerShouldTakeDamage( ply, attacker )
 
-	if ply:IsInMatch() then
-		return false
-	end
-
-	return true
+	return false
 
 end
 

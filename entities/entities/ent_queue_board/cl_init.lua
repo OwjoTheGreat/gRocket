@@ -7,28 +7,27 @@ surface.CreateFont( "queue_font", {
 	antialias = true
 } )
 
-local queue1 = {
-	
-	["Team1"] = { "Jake Butts", "Owain Owjo", "Mike Sano" },
-	["Team2"] = { "DinglePringle", "Pedz", "Keron" }
-
-}
-
 local function DrawGame( queueID , xPos , yPos )
+
+	if !GAMEMODE.Match.Queue[queueID] then return end
+	if !GAMEMODE.Match.Queue[queueID]["Players"]["Team1"] then return end
+	if !GAMEMODE.Match.Queue[queueID]["Players"]["Team2"] then return end
 
 	draw.RoundedBox(0,xPos,yPos,260,260,Color(255,255,255))
 
 	draw.RoundedBox(0,xPos,yPos,260,50,Color(0,0,0))
-	draw.SimpleText("Queue: "..queueID,"DermaLarge",xPos+130,yPos+25,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+	draw.SimpleText("Lobby: "..queueID,"DermaLarge",xPos+130,yPos+25,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 	local boxYPos = yPos + 50
 	local boxColor = { Color(34,139,34), Color(0,100,0) }
 	local boxCol = boxColor[2]
 
-	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Team1"] ) do
+	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Players"]["Team1"] ) do
+
+		if !IsValid(v) then return end
 
 		draw.RoundedBox(0,xPos,boxYPos,260,35,boxCol)
-		draw.SimpleText(v,"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 		boxYPos = boxYPos + 35
 		if boxCol == boxColor[1] then
@@ -42,10 +41,10 @@ local function DrawGame( queueID , xPos , yPos )
 	local boxColor = { Color(255,99,71), Color(255,69,0) }
 	local boxCol = boxColor[2]	
 
-	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Team2"] ) do
+	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Players"]["Team2"] ) do
 
 		draw.RoundedBox(0,xPos,boxYPos,260,35,boxCol)
-		draw.SimpleText(v,"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 		boxYPos = boxYPos + 35
 		if boxCol == boxColor[1] then
@@ -72,6 +71,8 @@ function ENT:Draw()
 
 		draw.RoundedBox(0,0,0,mainWide,mainTall,color_white)
 		draw.RoundedBox(0,25,25,mainWide-50,mainTall-50,Color(0,150,244))
+
+		draw.SimpleText("gRocket Queue","DermaLarge",mainWide/2,70,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 		local drawX1 = 25 + 30
 		local drawX2 = drawX1 + 260 + 30
@@ -103,8 +104,6 @@ function ENT:Draw()
 		if GAMEMODE.Match.Queue[6] then
 			DrawGame( 6 , drawX3 , drawY2 )
 		end
-
-		draw.SimpleText("gRocket Queue","DermaLarge",mainWide/2,70,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 	cam.End3D2D()
 

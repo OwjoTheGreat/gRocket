@@ -22,13 +22,3 @@ function ENT.Initialize(self)
 	end
 
 end
-
-function ENT:Use(activator)
-
-	if activator:IsPlayer() and activator:Alive() then
-
-		GAMEMODE.Match:JoinMatch( activator )
-
-	end
-
-end
