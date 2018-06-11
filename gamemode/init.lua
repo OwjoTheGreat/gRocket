@@ -24,6 +24,12 @@ function GM:PlayerInitialSpawn( ply )
 
 end
 
+function GM:PlayerDisconnected( ply )
+
+	self.Match:PlayerLeaveMatch( ply )
+
+end
+
 function GM:CanPlayerSuicide()
 	return false
 end
@@ -90,3 +96,13 @@ function GM:PlayerLoadout( ply )
 	return true
 
 end
+
+concommand.Add("eyetrace",function(ply,cmd,args)
+
+	local trace = ply:GetEyeTrace()
+	local ent = trace.Entity
+
+	print( "Pos: " .. tostring(ent:GetPos()) )
+	print( "Ang: " .. tostring(ent:GetAngles()) )
+
+end)

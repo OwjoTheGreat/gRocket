@@ -18,7 +18,7 @@ function ENT.Initialize(self)
 	if phys:IsValid() then
 		phys:Wake()
 		phys:EnableMotion( false )
-		phys:EnableCollisions( false )		
+		phys:EnableCollisions( false )			
 	end
 
 end

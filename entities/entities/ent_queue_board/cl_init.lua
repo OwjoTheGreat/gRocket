@@ -10,14 +10,10 @@ function ENT:Draw()
 
 	//self:DrawModel()
 
-	local imageMat = GAMEMODE.Util.Images["joinBoard"]
-
 	cam.Start3D2D( camPos , camAng , 0.1)
 
-		surface.SetDrawColor(color_white)
-	    surface.SetMaterial( imageMat )
-	    surface.DrawTexturedRect( 0 , 0 , 950 , 950 )
-		draw.NoTexture()
+		draw.RoundedBox(0,0,0,mainWide,mainTall,Color(255,0,0))
+		draw.SimpleText("JOIN QUEUE","DermaLarge",mainWide/2,mainTall/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 	cam.End3D2D()	
 

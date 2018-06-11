@@ -55,13 +55,37 @@ function GM.Match:JoinMatch( ply )
 		self:SpawnPlayerCar( ply )
 		GAMEMODE.Car:PlayerJoinedMatch( ply )
 
-		net.Start("gRocket_UpdateMatch")
-			net.WriteBool( true )
-		net.Send( ply )
+		self:UpdateMatch( ply , true )
 
 	end
 
 end
+
+function GM.Match:UpdateMatch( ply , inMatch )
+
+	net.Start("gRocket_UpdateMatch")
+		net.WriteBool( inMatch )
+	net.Send( ply )
+
+end
+
+function GM.Match:PlayerLeaveMatch( ply )
+
+	if !ply:GetCar() then return end
+
+	ply:RemoveCar()
+
+	ply:SetInMatch( false )
+
+	self:UpdateMatch( ply , false )
+
+end
+
+concommand.Add("leave_match",function( ply, cmd, args )
+
+	GAMEMODE.Match:PlayerLeaveMatch( ply )
+
+end)
 
 local pmeta = FindMetaTable( "Player" )
 
@@ -82,5 +106,20 @@ function pmeta:GetCar()
 	if !GAMEMODE.Match.Cars[self:SteamID64()] then return end
 
 	return GAMEMODE.Match.Cars[self:SteamID64()]
+
+end
+
+function pmeta:RemoveCar()
+
+	local car = self:GetCar()
+	local driver = car:GetDriver() or false
+
+	if driver then
+		driver:ExitVehicle()
+		driver:SetPos( GAMEMODE.Config.SpawnPos )
+	end
+
+	car:Remove()
+	GAMEMODE.Match.Cars[self:SteamID64()] = nil
 
 end

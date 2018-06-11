@@ -9,6 +9,8 @@
 include( "config/sh_config.lua" )
 include( "config/sv_config.lua" )
 
+include( "util/sv_util.lua" )
+
 include( "match/sv_match.lua" )
 
 include( "map/sv_map.lua" )
@@ -21,6 +23,8 @@ include( "car/sv_car.lua" )
 AddCSLuaFile( "cl_manifest.lua" )
 
 AddCSLuaFile( "config/sh_config.lua" )
+
+AddCSLuaFile( "util/cl_util.lua" )
 
 AddCSLuaFile( "car/cl_car.lua" )
 

@@ -12,8 +12,15 @@ function GM.Map:InitPostEntity()
 
 	local board = ents.Create("ent_match_board")
 	board:SetPos( GAMEMODE.Config.BoardPos )
+	board:SetAngles( GAMEMODE.Config.BoardAng )
 	board:Spawn()
 	board:Activate()
+
+	local queue = ents.Create("ent_queue_board")
+	queue:SetPos( GAMEMODE.Config.QueuePos )
+	queue:SetAngles( GAMEMODE.Config.QueueAng )
+	queue:Spawn()
+	queue:Activate()	
 
 	local ball = ents.Create("ent_match_ball")
 	ball:SetPos( GAMEMODE.Config.BallPos )

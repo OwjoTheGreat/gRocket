@@ -35,7 +35,11 @@ GM.Config.SpawnPos = Vector( 7841.591797 , 3350.276367 , 1607.031250 )
 GM.Config.CarPos = Vector( 6148.564941 , 2318.067139 , 1088.031250 )
 GM.Config.CarAng = Angle( 0 , 90 , 0 )
 
-GM.Config.BoardPos = Vector( 7927.968750 , 3176.031250 , 1592.031250 )
+GM.Config.BoardPos = Vector( 7821.472656 , 3161.940918 , 1600.575806 )
+GM.Config.BoardAng = Angle( 90 , -90 , 180 )
+
+GM.Config.QueuePos = Vector( 7942.119141 , 3296.791260 , 1600.575806 )
+GM.Config.QueueAng = Angle( 90 , 0 , 180 )
 
 GM.Config.BallPos = Vector( 6144.689453 , 3329.415039 , 1260.531250 )
 
