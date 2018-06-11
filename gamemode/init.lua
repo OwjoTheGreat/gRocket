@@ -34,6 +34,16 @@ function GM:CanPlayerSuicide()
 	return false
 end
 
+function GM:PhysgunPickup( ply , ent )
+
+	if table.HasValue( GAMEMODE.Config.ForbiddenEnts , ent:GetClass() ) then
+		return false
+	end
+
+	return true
+
+end
+
 function GM:InitPostEntity()
 
 	self.Map:InitPostEntity()

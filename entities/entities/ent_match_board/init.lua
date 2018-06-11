@@ -27,7 +27,7 @@ function ENT:Use(activator)
 
 	if activator:IsPlayer() and activator:Alive() then
 
-		GAMEMODE.Match:JoinMatch( activator )
+		GAMEMODE.Match:JoinQueue( activator )
 
 	end
 

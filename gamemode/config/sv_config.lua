@@ -21,6 +21,13 @@ GM.Config.PlayerLoadout = {
 	"weapon_physgun"
 }
 
+GM.Config.ForbiddenEnts = {
+	"ent_match_ball",
+	"ent_boost_ball",
+	"ent_match_board",
+	"ent_queue_board"
+}
+
 // Game Config
 GM.Config.BoostMultiplier = 100
 

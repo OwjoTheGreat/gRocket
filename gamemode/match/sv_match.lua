@@ -6,13 +6,21 @@
 
 GM.Match = (GAMEMODE or GM).Match or {}
 
+GM.Match.Queue = (GAMEMODE or GM).Match.Queue or {}
+GM.Match.Queue_Client = (GAMEMODE or GM).Match.Queue_Client or {}
+
 GM.Match.Cars = (GAMEMODE or GM).Match.Cars or {}
 
 util.AddNetworkString( "gRocket_UpdateMatch" )
+util.AddNetworkString( "gRocket_UpdatePlayerQueue" )
+util.AddNetworkString( "gRocket_UpdateQueue" )
 
 function GM.Match:InitialSpawn( ply )
 
 	ply:SetInMatch( false )
+	ply:SetInQueue( false )
+
+	self:UpdateQueue()
 
 end
 
@@ -47,11 +55,45 @@ function GM.Match:SpawnPlayerCar( ply )
 
 end
 
+function GM.Match:JoinQueue( ply )
+
+	if !ply:IsInMatch() and !ply:IsInQueue() then
+
+		ply:SetInQueue( true )
+
+		// Temp
+		if !self.Queue[1] then
+			self.Queue[1] = {}
+			self.Queue[1]["Team1"] = {}
+			self.Queue[1]["Team2"] = {}
+		end
+
+		self.Queue[1]["Team1"][ply:SteamID64()] = true
+
+		if !self.Queue_Client[1] then
+
+			self.Queue_Client[1] = {}
+			self.Queue_Client[1]["Team1"] = {}
+			self.Queue_Client[1]["Team2"] = {}
+
+		end
+
+		table.insert( self.Queue_Client[1]["Team1"] , ply:Name() )
+
+		self:UpdatePlayerQueue( ply , true )
+
+		self:UpdateQueue()
+
+	end
+
+end
+
 function GM.Match:JoinMatch( ply )
 
-	if !ply:IsInMatch() then
+	if !ply:IsInMatch() and ply:IsInQueue() then
 		
 		ply:SetInMatch( true )
+		ply:SetInQueue( false )
 		self:SpawnPlayerCar( ply )
 		GAMEMODE.Car:PlayerJoinedMatch( ply )
 
@@ -66,6 +108,22 @@ function GM.Match:UpdateMatch( ply , inMatch )
 	net.Start("gRocket_UpdateMatch")
 		net.WriteBool( inMatch )
 	net.Send( ply )
+
+end
+
+function GM.Match:UpdatePlayerQueue( ply , inQueue )
+
+	net.Start("gRocket_UpdatePlayerQueue")
+		net.WriteBool( inQueue )
+	net.Send( ply )
+
+end
+
+function GM.Match:UpdateQueue()
+
+	net.Start("gRocket_UpdateQueue")
+		net.WriteTable( self.Queue_Client )
+	net.Broadcast()
 
 end
 
@@ -95,9 +153,21 @@ function pmeta:SetInMatch( inMatch )
 
 end
 
+function pmeta:SetInQueue( inQueue )
+
+	self.inQueue = inQueue
+
+end
+
 function pmeta:IsInMatch()
 
 	return self.inMatch
+
+end
+
+function pmeta:IsInQueue()
+
+	return self.inQueue
 
 end
 
