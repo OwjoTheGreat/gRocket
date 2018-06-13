@@ -7,6 +7,20 @@ surface.CreateFont( "queue_font", {
 	antialias = true
 } )
 
+surface.CreateFont( "queue_font_large", {
+	font = "Roboto",
+	extended = false,
+	size = 50,
+	antialias = true
+} )
+
+surface.CreateFont( "queue_font_larger", {
+	font = "Roboto",
+	extended = false,
+	size = 100,
+	antialias = true
+} )
+
 local starMat = Material( "icon16/shield.png" )
 
 local function DrawGame( queueID , xPos , yPos )
@@ -56,7 +70,7 @@ local function DrawGame( queueID , xPos , yPos )
 	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Players"]["Team2"] ) do
 
 		draw.RoundedBox(0,xPos,boxYPos,260,35,boxCol)
-		
+
 		if v:IsTeamLeader(queueID) then
 			local iconSize = 16
 			surface.SetMaterial( starMat )
@@ -94,7 +108,7 @@ function ENT:Draw()
 		draw.RoundedBox(0,0,0,mainWide,mainTall,color_white)
 		draw.RoundedBox(0,25,25,mainWide-50,mainTall-50,Color(0,150,244))
 
-		draw.SimpleText("gRocket Queue","DermaLarge",mainWide/2,70,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		draw.SimpleText("gRocket Queue","queue_font_large",mainWide/2,80,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 		local drawX1 = 25 + 30
 		local drawX2 = drawX1 + 260 + 30
@@ -102,10 +116,11 @@ function ENT:Draw()
 
 		local drawY1 = 150
 		local drawY2 = drawY1 + 260 + 30
+		local drawY3 = drawY2 + 260 + 30
 
 		if GAMEMODE.Match.Queue[1] then
 			DrawGame( 1 , drawX1 , drawY1 )
-		end
+		end									
 
 		if GAMEMODE.Match.Queue[2] then
 			DrawGame( 2 , drawX2 , drawY1 )
@@ -126,6 +141,16 @@ function ENT:Draw()
 		if GAMEMODE.Match.Queue[6] then
 			DrawGame( 6 , drawX3 , drawY2 )
 		end
+
+		// Bottom Left Box
+		draw.RoundedBox(0,drawX1,drawY3,260,165,Color(255,255,255))
+		draw.SimpleText("0","queue_font_larger",drawX1 +130,drawY3 +82.5,Color(0,100,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+
+		draw.RoundedBox(0,drawX2,drawY3,260,165,Color(255,255,255))
+		draw.SimpleText("5:00","queue_font_larger",drawX2 +130,drawY3 +82.5,Color(0,0,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+
+		draw.RoundedBox(0,drawX3,drawY3,260,165,Color(255,255,255))
+		draw.SimpleText("0","queue_font_larger",drawX3 +130,drawY3 +82.5,Color(255,69,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 	cam.End3D2D()
 

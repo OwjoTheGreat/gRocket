@@ -521,12 +521,16 @@ function GM.Match:OpenQueueSpawnMenu()
 			draw.SimpleText("Visit the spawn area to join a lobby!","queueMenuFont",w/2,h/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 		elseif !groupLeader then
 			draw.SimpleText("Your match will start shortly!","queueMenuFont",w/2,h/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-		end		
+		elseif GAMEMODE.Match.Queue[queueID]["Security"] == "open" then
+			draw.SimpleText("Your match will start shortly!","queueMenuFont",w/2,h/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		end
 	end
 
 	local inviteList
 
 	if groupLeader then
+
+		if GAMEMODE.Match.Queue[queueID]["Security"] == "open" then return end
 
 		local inviteButton = vgui.Create( "DButton" , invitePanel )
 		inviteButton:SetText("Invite Players")
