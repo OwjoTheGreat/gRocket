@@ -7,6 +7,8 @@ surface.CreateFont( "queue_font", {
 	antialias = true
 } )
 
+local starMat = Material( "icon16/shield.png" )
+
 local function DrawGame( queueID , xPos , yPos )
 
 	if !GAMEMODE.Match.Queue[queueID] then return end
@@ -27,7 +29,17 @@ local function DrawGame( queueID , xPos , yPos )
 		if !IsValid(v) then return end
 
 		draw.RoundedBox(0,xPos,boxYPos,260,35,boxCol)
-		draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+
+		if v:IsTeamLeader(queueID) then
+			local iconSize = 16
+			surface.SetMaterial( starMat )
+			surface.SetDrawColor( 255, 255, 255, 255 )
+			surface.DrawTexturedRect( xPos + 70, boxYPos +10, iconSize, iconSize )
+			draw.NoTexture()
+			draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		else
+			draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		end
 
 		boxYPos = boxYPos + 35
 		if boxCol == boxColor[1] then
@@ -44,7 +56,17 @@ local function DrawGame( queueID , xPos , yPos )
 	for k, v in pairs( GAMEMODE.Match.Queue[queueID]["Players"]["Team2"] ) do
 
 		draw.RoundedBox(0,xPos,boxYPos,260,35,boxCol)
-		draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		
+		if v:IsTeamLeader(queueID) then
+			local iconSize = 16
+			surface.SetMaterial( starMat )
+			surface.SetDrawColor( 255, 255, 255, 255 )
+			surface.DrawTexturedRect( xPos + 70, boxYPos +10, iconSize, iconSize )
+			draw.NoTexture()
+			draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		else
+			draw.SimpleText(v:Nick(),"queue_font",xPos+130,boxYPos + 17.5,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+		end
 
 		boxYPos = boxYPos + 35
 		if boxCol == boxColor[1] then

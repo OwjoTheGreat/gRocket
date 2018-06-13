@@ -18,6 +18,9 @@ util.AddNetworkString( "gRocket_RequestQueue" )
 util.AddNetworkString( "gRocket_RequestRandom" )
 util.AddNetworkString( "gRocket_RequestLeave" )
 
+util.AddNetworkString( "gRocket_AdminKick" )
+util.AddNetworkString( "gRocket_AdminDisband" )
+
 function GM.Match:InitialSpawn( ply )
 
 	ply:SetInMatch( false )
@@ -63,6 +66,7 @@ function GM.Match:CreateLobby( ply , security )
 	local lobbyTable = {
 
 		["Security"] = security,
+		["Leader"] = ply,
 		["Players"] = {
 
 			["Team1"] = {},
@@ -84,8 +88,10 @@ function GM.Match:JoinQueue( ply , queueID )
 
 	if (#self.Queue[queueID]["Players"]["Team1"] > #self.Queue[queueID]["Players"]["Team2"]) then
 		table.insert( self.Queue[queueID]["Players"]["Team2"] , ply )
+		ply:SetTeamName("Team2")
 	else
 		table.insert( self.Queue[queueID]["Players"]["Team1"] , ply )
+		ply:SetTeamName("Team1")
 	end
 
 	ply:SetInQueue( true )
@@ -171,13 +177,35 @@ function GM.Match:UpdateQueue()
 
 end
 
+function GM.Match:GetGroupPlayers( groupID )
+
+	local plyTable = {}
+
+	if !self.Queue[groupID] then return end
+
+	for k, v in pairs(self.Queue[groupID]["Players"]["Team1"]) do
+
+		table.insert( plyTable , v )
+
+	end
+
+	for k, v in pairs(self.Queue[groupID]["Players"]["Team2"]) do
+
+		table.insert( plyTable , v )
+
+	end
+
+	return plyTable
+
+end
+
 function GM.Match:RequestQueue( ply )
 
 	local plyTable = {}
 
 	for k, v in pairs( player.GetAll() ) do
 
-		if !v:IsInQueue() or !v:IsInMatch() then
+		if !v:IsInQueue() and !v:IsInMatch() then
 			table.insert( plyTable, v )
 		end
 
@@ -222,6 +250,55 @@ function GM.Match:PlayerLeaveQueue( ply )
 	self:UpdateQueue()	
 
 end
+
+function GM.Match:KickPlayer( ply , kickPlayer )
+
+	if !ply:GetQueueID() then return end
+	if !kickPlayer:GetQueueID() then return end
+
+	local queueID = ply:GetQueueID()
+	local kickQueueID = kickPlayer:GetQueueID()
+
+	if !( queueID == kickQueueID ) then return end
+
+	if !ply:IsTeamLeader( queueID ) then return end
+
+	table.RemoveByValue( self.Queue[queueID]["Players"][kickPlayer:GetTeamName()] , kickPlayer )
+
+	if (#self.Queue[queueID]["Players"]["Team1"] == 0) and (#self.Queue[queueID]["Players"]["Team2"] == 0) then
+		self.Queue[queueID] = nil
+	end
+
+	ply:SetInQueue( false )
+	ply:SetQueueID( nil )	
+
+	self:UpdatePlayerQueue( kickPlayer , false )
+	self:UpdateQueue()
+
+end
+net.Receive("gRocket_AdminKick",function( len,ply )
+	local kickply = net.ReadEntity()
+	GAMEMODE.Match:KickPlayer( ply , kickply )
+end)
+
+function GM.Match:DisbandGroup( ply )
+
+	if !ply:GetQueueID() then return end
+
+	local queueID = ply:GetQueueID()
+
+	if !ply:IsTeamLeader( queueID ) then return end
+
+	for k, v in pairs( self:GetGroupPlayers(queueID) ) do
+
+		self:KickPlayer( ply , v )
+
+	end
+
+end
+net.Receive("gRocket_AdminDisband",function( len,ply )
+	GAMEMODE.Match:DisbandGroup( ply )
+end)
 
 net.Receive("gRocket_RequestLeave",function(len,ply)
 
@@ -270,6 +347,28 @@ end
 function pmeta:GetQueueID()
 
 	return self.queueID or false
+
+end
+
+function pmeta:SetTeamName( teamName )
+
+	self.teamName = teamName
+
+end
+
+function pmeta:GetTeamName()
+
+	return self.teamName or false
+
+end
+
+function pmeta:IsTeamLeader( queueID )
+
+	if (GAMEMODE.Match.Queue[queueID]["Leader"] == self) then
+		return true
+	else
+		return false
+	end
 
 end
 
