@@ -8,6 +8,8 @@ GM.Match = (GAMEMODE or GM).Match or {}
 
 GM.Match.Queue = (GAMEMODE or GM).Match.Queue or {}
 
+GM.Match.Invites = (GAMEMODE or GM).Match.Invites or {}
+
 GM.Match.Cars = (GAMEMODE or GM).Match.Cars or {}
 
 util.AddNetworkString( "gRocket_UpdateMatch" )
@@ -16,7 +18,11 @@ util.AddNetworkString( "gRocket_UpdateQueue" )
 util.AddNetworkString( "gRocket_RequestQueue" )
 
 util.AddNetworkString( "gRocket_RequestRandom" )
+util.AddNetworkString( "gRocket_RequestPrivate" )
+util.AddNetworkString( "gRocket_CreatePrivate" )
 util.AddNetworkString( "gRocket_RequestLeave" )
+
+util.AddNetworkString( "gRocket_RequestInvite" )
 
 util.AddNetworkString( "gRocket_AdminKick" )
 util.AddNetworkString( "gRocket_AdminDisband" )
@@ -61,7 +67,27 @@ function GM.Match:SpawnPlayerCar( ply )
 
 end
 
-function GM.Match:CreateLobby( ply , security )
+function GM.Match:InvitePlayer( ply , groupID )
+
+	if !self.Invites[groupID] then
+		self.Invites[groupID] = {}
+	end
+
+	table.insert( self.Invites[groupID] , ply )
+
+end
+
+function GM.Match:HasInvite( ply , groupID )
+
+	if table.HasValue(self.Invites[groupID] , ply) then
+		return true
+	end
+
+	return false
+
+end
+
+function GM.Match:CreateLobby( ply , security , plyTable )
 
 	local lobbyTable = {
 
@@ -79,6 +105,22 @@ function GM.Match:CreateLobby( ply , security )
 	local index = table.insert( self.Queue , lobbyTable )
 
 	self:JoinQueue( ply , index )
+
+	if security == "closed" then
+
+		for k, v in pairs( plyList ) do
+
+			local ply = GAMEMODE.Util:FindPlayerByName( v )
+
+			if IsValid(ply) then
+
+				self:InvitePlayer( ply , index )
+
+			end
+
+		end
+
+	end
 
 end
 
@@ -132,11 +174,43 @@ function GM.Match:JoinRandomQueue( ply )
 
 end
 
+function GM.Match:JoinPrivateQueue( ply , queueID )
+
+	if !ply:IsInMatch() and !ply:IsInQueue() then
+		
+		if !self.Queue[queueID] then return end
+		if !self:HasInvite( ply , queueID ) then return end
+
+		self:JoinQueue( ply , queueID )
+
+	end
+
+end
+
+function GM.Match:CreatePrivateQueue( ply )
+
+	if !ply:IsInMatch() and !ply:IsInQueue() then
+
+		local plyTable = net.ReadTable()
+
+		self:CreateLobby( ply , "closed" , plyTable )
+
+	end
+
+end
+
 net.Receive("gRocket_RequestRandom",function(len,ply)
-
 	GAMEMODE.Match:JoinRandomQueue( ply )
-
 end)
+
+net.Receive("gRocket_RequestPrivate",function(len,ply)
+	GAMEMODE.Match:JoinPrivateQueue( ply )
+end)
+
+net.Receive("gRocket_CreatePrivate",function(len,ply)
+	GAMEMODE.Match:CreatePrivateQueue( ply )
+end)
+
 
 function GM.Match:JoinMatch( ply )
 

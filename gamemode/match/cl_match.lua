@@ -240,17 +240,6 @@ function GM.Match:OpenQueueMenu( playerList )
 
 	end
 
-	local privateButton = vgui.Create( "DButton",queuePanel )
-	privateButton:SetText("")
-	privateButton:SetPos(queuePanel:GetWide()/2,0)
-	privateButton:SetSize( queuePanel:GetWide()/2 , queuePanel:GetTall()/2 )
-	privateButton.Paint = function(self,w,h)
-
-		draw.RoundedBox(0,0,0,w,h,Color(0,191,255))
-		draw.SimpleText("Private Lobby","DermaLarge",w/2,h/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-	
-	end
-
 	local plyList = vgui.Create( "DListView", queuePanel )
 	plyList:SetPos(queuePanel:GetWide()/2,queuePanel:GetTall()/2)
 	plyList:SetSize( queuePanel:GetWide()/2 , queuePanel:GetTall()/2 )
@@ -261,6 +250,38 @@ function GM.Match:OpenQueueMenu( playerList )
 	for k, v in pairs( playerList ) do
 
 		plyList:AddLine( v:Name() )
+
+	end	
+
+	local privateButton = vgui.Create( "DButton",queuePanel )
+	privateButton:SetText("")
+	privateButton:SetPos(queuePanel:GetWide()/2,0)
+	privateButton:SetSize( queuePanel:GetWide()/2 , queuePanel:GetTall()/2 )
+	privateButton.Paint = function(self,w,h)
+
+		draw.RoundedBox(0,0,0,w,h,Color(0,191,255))
+		draw.SimpleText("Private Lobby","DermaLarge",w/2,h/2,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+	
+	end
+	privateButton.DoClick = function()
+
+		local plyNames = {}
+
+		for k, v in pairs(plyList:GetSelected()) do
+
+			table.insert( plyNames , v:GetColumnText(1) )
+
+		end
+
+		if !GAMEMODE.Util:IsTableEmpty( plyNames ) then
+
+			net.Start("gRocket_CreatePrivate")
+				net.WriteTable( plyNames )
+			net.SendToServer()
+
+		end
+
+		queueMenu:Close()
 
 	end
 
@@ -573,6 +594,22 @@ function GM.Match:OpenQueueSpawnMenu()
 			inviteButton:SetSize( inviteFrame:GetWide(),75 )
 			inviteButton:SetText("Invite Player")
 			inviteButton.DoClick = function()
+
+				local plyNames = {}
+
+				for k, v in pairs(plyList:GetSelected()) do
+
+					table.insert( plyNames , v:GetColumnText(1) )
+
+				end
+
+				if !GAMEMODE.Util:IsTableEmpty( plyNames ) then
+
+					net.Start("gRocket_RequestInvite")
+						net.WriteTable(plyNames)
+					net.SendToServer()
+
+				end
 
 			end
 

@@ -7,6 +7,13 @@ surface.CreateFont( "queue_font", {
 	antialias = true
 } )
 
+surface.CreateFont( "queue_font_mid", {
+	font = "Roboto",
+	extended = false,
+	size = 25,
+	antialias = true
+} )
+
 surface.CreateFont( "queue_font_large", {
 	font = "Roboto",
 	extended = false,
@@ -32,7 +39,16 @@ local function DrawGame( queueID , xPos , yPos )
 	draw.RoundedBox(0,xPos,yPos,260,260,Color(255,255,255))
 
 	draw.RoundedBox(0,xPos,yPos,260,50,Color(0,0,0))
-	draw.SimpleText("Lobby: "..queueID,"DermaLarge",xPos+130,yPos+25,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+
+	local lobbyText = "Lobby: "
+
+	if GAMEMODE.Match.Queue[queueID]["Security"] == "open" then
+		lobbyText = "Public Lobby: "
+	else
+		lobbyText = "Private Lobby: "
+	end
+
+	draw.SimpleText(lobbyText..queueID,"queue_font_mid",xPos+130,yPos+25,Color(255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 
 	local boxYPos = yPos + 50
 	local boxColor = { Color(34,139,34), Color(0,100,0) }

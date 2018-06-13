@@ -38,3 +38,13 @@ function GM.Util:DownloadImage(id,name)
 		end
 	)
 end
+
+function GM.Util:IsTableEmpty( checkTable )
+
+	if next(checkTable) == nil then
+	   return false
+	end
+
+	return true
+
+end
