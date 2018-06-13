@@ -15,6 +15,7 @@ include( "sv_manifest.lua" )
 function GM:Initialize()
 
 	self.Car:Initialize()
+	self.Match:Initialize()
 
 end
 

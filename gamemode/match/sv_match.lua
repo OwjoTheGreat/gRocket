@@ -27,6 +27,57 @@ util.AddNetworkString( "gRocket_RequestInvite" )
 util.AddNetworkString( "gRocket_AdminKick" )
 util.AddNetworkString( "gRocket_AdminDisband" )
 
+function GM.Match:GetQueuePlayers( queueID )
+
+	if !self.Queue[queueID] then return end
+
+	local plyTable = {}
+	plyTable["Team1"] = {}
+	plyTable["Team2"] = {}
+
+	for k, v in pairs(self.Queue[queueID]["Players"]["Team1"]) do
+
+		table.insert( plyTable["Team1"] , v )
+
+	end
+
+	for k, v in pairs(self.Queue[queueID]["Players"]["Team2"]) do
+
+		table.insert( plyTable["Team2"] , v )
+
+	end
+
+	local plyAmount = #plyTable["Team1"] + #plyTable["Team2"]
+
+	return plyAmount, plyTable
+
+end
+
+function GM.Match:Initialize()
+
+	timer.Create("gRocket_QueueCheck",30,0,function()
+
+		if self:CurrentGame() then return end
+
+		if !self.Queue[1] then return end
+		if !(self.Queue[1]["Created"] + 30 > CurTime()) then return end
+
+		local queueAmount, queuePlayers = self:GetQueuePlayers( 1 )
+
+		if #queueAmount < 2 then return end
+
+		self:StartMatch( queueAmount , queuePlayers )
+
+		self.Queue[1] = nil
+
+		self:UpdateQueue()		
+
+		// Update Game Details Here
+
+	end)
+
+end
+
 function GM.Match:InitialSpawn( ply )
 
 	ply:SetInMatch( false )
@@ -48,13 +99,13 @@ function GM.Match:OnCarSpawned( ply , car )
 
 end
 
-function GM.Match:SpawnPlayerCar( ply )
+function GM.Match:SpawnPlayerCar( ply , pos , ang )
 
 	local car = ents.Create( "prop_vehicle_jeep_old" )
 	car:SetModel("models/tdmcars/focusrs.mdl")
 	car:SetKeyValue("vehiclescript","scripts/vehicles/TDMCars/focusrs.txt")
-	car:SetPos( GAMEMODE.Config.CarPos )
-	car:SetAngles( GAMEMODE.Config.CarAng )
+	car:SetPos( pos )
+	car:SetAngles( ang )
 	car.Owner = ply
 	car:Spawn()
 	car:Activate()
@@ -64,6 +115,89 @@ function GM.Match:SpawnPlayerCar( ply )
 	self.Cars[ply:SteamID64()] = car
 
 	self.OnCarSpawned( ply , car )
+
+end
+
+function GM.Match:StartMatch( plyAmount, playerList )
+
+	local team1 = GAMEMODE.Config.CarPositions["Team1"]
+	local team2 = GAMEMODE.Config.CarPositions["Team2"]
+
+	local positions = {
+
+		["Team1"] = {},
+		["Team2"] = {}
+
+	}
+
+	if (#playerList["Team1"] == 1 and #playerList["Team2"] == 1) then
+		positions["Team1"] = { team1[1] }
+		positions["Team2"] = { team2[1] }
+	elseif (#playerList["Team1"] == 1 and #playerList["Team2"] == 2) then
+		positions["Team1"] = { team1[1] }
+		positions["Team2"] = { team2[2] , team2[3] }
+	elseif (#playerList["Team1"] == 1 and #playerList["Team2"] == 3) then
+		positions["Team1"] = { team1[1] }
+		positions["Team2"] = { team2[1] , team2[2] , team2[3] }
+	elseif (#playerList["Team1"] == 2 and #playerList["Team2"] == 1) then
+		positions["Team1"] = { team1[3] , team1[2] }
+		positions["Team2"] = { team2[1] }
+	elseif (#playerList["Team1"] == 3 and #playerList["Team2"] == 1) then
+		positions["Team1"] = { team1[1] , team1[2] , team1[3] }
+		positions["Team2"] = { team2[1] }
+	elseif (#playerList["Team1"] == 2 and #playerList["Team2"] == 2) then
+		positions["Team1"] = { team1[2] , team1[3] }
+		positions["Team2"] = { team2[2] , team2[3] }
+	elseif (#playerList["Team1"] == 3 and #playerList["Team2"] == 2) then
+		positions["Team1"] = { team1[1] , team1[2], team1[3] }
+		positions["Team2"] = { team2[2] , team2[3] }
+	elseif (#playerList["Team1"] == 2 and #playerList["Team2"] == 3) then
+		positions["Team1"] = { team1[2] , team1[3] }
+		positions["Team2"] = { team2[1] , team2[2] , team2[3] }
+	else		
+		positions["Team1"] = { team1[1] , team1[2] , team1[3] }
+		positions["Team2"] = { team2[1] , team2[2] , team2[3] }
+	end
+
+	local team1increase = 1
+	local team2increase = 1
+
+	for k, v in pairs(playerList) do
+
+		local plyTeam = v:GetTeamName()
+
+		if plyTeam == "Team1" then
+
+			self:JoinMatch( v , positions["Team1"][team1increase] , GAMEMODE.Config.CarAngles["Team1"] )
+			team1increase = team1increase + 1
+
+		else
+ 
+ 			self:JoinMatch( v , positions["Team2"][team2increase] , GAMEMODE.Config.CarAngles["Team2"] )
+ 			team2increase = team2increase + 1
+
+ 		end
+
+
+	end
+
+end
+
+function GM.Match:JoinMatch( ply , pos , ang )
+
+	if !ply:IsInMatch() and ply:IsInQueue() then
+		
+		ply:SetInMatch( true )
+		ply:SetInQueue( false )
+		ply:SetQueueID( nil )
+
+		self:UpdatePlayerQueue( v , false )
+		self:SpawnPlayerCar( ply , pos , ang )
+		GAMEMODE.Car:PlayerJoinedMatch( ply )
+
+		self:UpdateMatch( ply , true )
+
+	end
 
 end
 
@@ -93,6 +227,7 @@ function GM.Match:CreateLobby( ply , security , plyTable )
 
 		["Security"] = security,
 		["Leader"] = ply,
+		["Created"] = CurTime(),
 		["Players"] = {
 
 			["Team1"] = {},
@@ -211,21 +346,6 @@ net.Receive("gRocket_CreatePrivate",function(len,ply)
 	GAMEMODE.Match:CreatePrivateQueue( ply )
 end)
 
-
-function GM.Match:JoinMatch( ply )
-
-	if !ply:IsInMatch() and ply:IsInQueue() then
-		
-		ply:SetInMatch( true )
-		ply:SetInQueue( false )
-		self:SpawnPlayerCar( ply )
-		GAMEMODE.Car:PlayerJoinedMatch( ply )
-
-		self:UpdateMatch( ply , true )
-
-	end
-
-end
 
 function GM.Match:UpdateMatch( ply , inMatch )
 

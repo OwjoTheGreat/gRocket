@@ -39,8 +39,32 @@ GM.Config.BoostDelay = 10
 
 GM.Config.SpawnPos = Vector( 7841.591797 , 3350.276367 , 1607.031250 )
 
-GM.Config.CarPos = Vector( 6148.564941 , 2318.067139 , 1088.031250 )
-GM.Config.CarAng = Angle( 0 , 90 , 0 )
+GM.Config.CarPositions = {
+	
+	["Team1"] = {
+
+		Vector( 6148.564941 , 2318.067139 , 1088.031250 ),
+		Vector( 5445.368652 , 2355.130371 , 1088.031250 ),
+		Vector( 6840.470703 , 2355.130371 , 1088.031250 ),
+
+	},
+
+	["Team2"] = {
+
+		Vector( 6148.564941 , 4327.604980 , 1088.031250 ),
+		Vector( 5445.368652 , 4418.386230 , 1088.031250 ),
+		Vector( 6840.470703 , 4418.386230 , 1088.031250 ),
+
+	}	
+
+}
+
+GM.Config.CarAngles = {
+	
+	["Team1"] = Angle( 0,0,0 ),
+	["Team2"] = Angle( 0,180,0 )
+
+}
 
 GM.Config.BoardPos = Vector( 7821.472656 , 3161.940918 , 1600.575806 )
 GM.Config.BoardAng = Angle( 90 , -90 , 180 )
