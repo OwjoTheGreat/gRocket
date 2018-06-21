@@ -7,10 +7,11 @@
 GM.Match = (GAMEMODE or GM).Match or {}
 
 GM.Match.Queue = (GAMEMODE or GM).Match.Queue or {}
-
 GM.Match.Invites = (GAMEMODE or GM).Match.Invites or {}
-
 GM.Match.Cars = (GAMEMODE or GM).Match.Cars or {}
+GM.Match.Game = (GAMEMODE or GM).Match.Game or {}
+
+GM.Match.QueueAttempts = (GAMEMODE or GM).Match.QueueAttempts or 0
 
 util.AddNetworkString( "gRocket_UpdateMatch" )
 util.AddNetworkString( "gRocket_UpdatePlayerQueue" )
@@ -21,7 +22,6 @@ util.AddNetworkString( "gRocket_RequestRandom" )
 util.AddNetworkString( "gRocket_RequestPrivate" )
 util.AddNetworkString( "gRocket_CreatePrivate" )
 util.AddNetworkString( "gRocket_RequestLeave" )
-
 util.AddNetworkString( "gRocket_RequestInvite" )
 
 util.AddNetworkString( "gRocket_AdminKick" )
@@ -53,6 +53,16 @@ function GM.Match:GetQueuePlayers( queueID )
 
 end
 
+function GM.Match:CurrentGame()
+
+	if table.Count( self.Game ) == 0 then
+
+		return false
+
+	end
+
+end
+
 function GM.Match:Initialize()
 
 	timer.Create("gRocket_QueueCheck",30,0,function()
@@ -64,7 +74,34 @@ function GM.Match:Initialize()
 
 		local queueAmount, queuePlayers = self:GetQueuePlayers( 1 )
 
-		if #queueAmount < 2 then return end
+		if !queueAmount then return end
+		if !queuePlayers then return end
+
+		if queueAmount < 2 then
+			
+			self.QueueAttempts = self.QueueAttempts + 1
+
+			if self.QueueAttempts > 3 then
+
+				local owner = self.Queue["Leader"]
+
+				if !IsValid( owner ) then return end
+
+				local tempQueue = self.Queue[1]
+
+				table.insert( self.Queue , tempQueue )
+
+				table.remove( self.Queue , 1 )
+
+				self:UpdateQueue()
+
+				owner:PrintMessage( HUD_PRINTCENTER , "Your team has been moved to the back of the queue as you do not have enough players." )
+
+			end
+
+			return
+
+		end
 
 		self:StartMatch( queueAmount , queuePlayers )
 
@@ -181,6 +218,9 @@ function GM.Match:StartMatch( plyAmount, playerList )
 
 	end
 
+	table.remove( self.Queue , 1 )
+	self.QueueAttempts = 0
+
 end
 
 function GM.Match:JoinMatch( ply , pos , ang )
@@ -243,7 +283,7 @@ function GM.Match:CreateLobby( ply , security , plyTable )
 
 	if security == "closed" then
 
-		for k, v in pairs( plyList ) do
+		for k, v in pairs( plyTable ) do
 
 			local ply = GAMEMODE.Util:FindPlayerByName( v )
 
@@ -356,6 +396,8 @@ function GM.Match:UpdateMatch( ply , inMatch )
 end
 
 function GM.Match:UpdatePlayerQueue( ply , inQueue )
+
+	if !IsValid(ply) then return end
 
 	net.Start("gRocket_UpdatePlayerQueue")
 		net.WriteBool( inQueue )
